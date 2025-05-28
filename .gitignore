@@ -48,3 +48,6 @@ next-env.d.ts
 *.njsproj
 *.sln
 *.sw?
+
+git config --global user.name "fcruzpyt2"
+git config --global user.email "fcruzpyt2@gmail.com"
