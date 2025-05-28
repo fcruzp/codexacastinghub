@@ -16,7 +16,6 @@ export default function Register() {
   const [userType, setUserType] = useState<"actor" | "casting">("actor");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,8 +71,6 @@ export default function Register() {
           if (companyError) throw companyError;
         }
 
-        setSuccess("Cuenta creada exitosamente");
-        
         // Redirigir al perfil correspondiente
         if (userType === "actor") {
           navigate("/actor/profile");

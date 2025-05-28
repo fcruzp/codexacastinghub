@@ -1,34 +1,15 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { supabase } from "@/lib/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Film, Clapperboard, UserCircle, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Film, Clapperboard, UserCircle, ArrowRight } from "lucide-react";
+import { Button } from "./components/ui/button";
+import { Card, CardContent } from "./components/ui/card";
 
 export default function Home() {
   const navigate = useNavigate();
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const checkUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      setUser(data.user);
-      setLoading(false);
-    };
-
-    checkUser();
-  }, []);
 
   const handleGetStarted = () => {
-    if (user) {
-      // Check user role and redirect accordingly
-      navigate("/actor/dashboard");
-    } else {
-      navigate("/auth/register");
-    }
+    // Puedes agregar lógica para verificar el rol del usuario aquí si es necesario
+    // Por ahora, simplemente redirigimos a la página de registro como ejemplo
+    navigate("/auth/register");
   };
 
   return (
@@ -36,8 +17,8 @@ export default function Home() {
       {/* Hero section */}
       <section className="relative">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-900/90 to-purple-900/90 z-0" />
-        <div 
-          className="absolute inset-0 z-0 bg-cover bg-center opacity-50" 
+        <div
+          className="absolute inset-0 z-0 bg-cover bg-center opacity-50"
           style={{ backgroundImage: "url('https://images.pexels.com/photos/3062541/pexels-photo-3062541.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2')" }}
         />
         <div className="container relative z-10 mx-auto px-4 py-24 sm:py-32 text-white">
@@ -46,20 +27,20 @@ export default function Home() {
               The Ultimate Casting Platform
             </h1>
             <p className="text-xl mb-8">
-              Connect actors with casting directors seamlessly. Create stunning profiles, 
+              Connect actors with casting directors seamlessly. Create stunning profiles,
               upload your best work, and find the perfect roles for your career.
             </p>
             <div className="flex flex-wrap gap-4">
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 onClick={handleGetStarted}
                 className="bg-white text-blue-900 hover:bg-blue-50 font-medium"
               >
                 Get Started
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="lg"
                 className="border-white text-white hover:bg-white/10"
                 onClick={() => navigate("/browse")}
@@ -82,7 +63,7 @@ export default function Home() {
               Our platform streamlines the casting process from start to finish
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <Card className="bg-card shadow-md hover:shadow-lg transition-shadow overflow-hidden border-0">
               <div className="h-2 bg-blue-500" />
@@ -92,12 +73,12 @@ export default function Home() {
                 </div>
                 <h3 className="text-xl font-medium mb-2">Rich Actor Profiles</h3>
                 <p className="text-muted-foreground">
-                  Create detailed profiles with all your vital statistics, experience, 
+                  Create detailed profiles with all your vital statistics, experience,
                   and skills to stand out to casting directors.
                 </p>
               </CardContent>
             </Card>
-            
+
             <Card className="bg-card shadow-md hover:shadow-lg transition-shadow overflow-hidden border-0">
               <div className="h-2 bg-purple-500" />
               <CardContent className="pt-6">
@@ -106,12 +87,12 @@ export default function Home() {
                 </div>
                 <h3 className="text-xl font-medium mb-2">Media Portfolio</h3>
                 <p className="text-muted-foreground">
-                  Upload headshots, reels, voice recordings and resumes to showcase 
+                  Upload headshots, reels, voice recordings and resumes to showcase
                   your talent in the best possible light.
                 </p>
               </CardContent>
             </Card>
-            
+
             <Card className="bg-card shadow-md hover:shadow-lg transition-shadow overflow-hidden border-0">
               <div className="h-2 bg-amber-500" />
               <CardContent className="pt-6">
@@ -120,7 +101,7 @@ export default function Home() {
                 </div>
                 <h3 className="text-xl font-medium mb-2">Casting Projects</h3>
                 <p className="text-muted-foreground">
-                  Casting companies can create detailed project listings to attract 
+                  Casting companies can create detailed project listings to attract
                   the perfect actors for their productions.
                 </p>
               </CardContent>
@@ -140,11 +121,11 @@ export default function Home() {
               A simple process designed for both actors and casting directors
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-5xl mx-auto">
             <div className="space-y-12">
               <h3 className="text-2xl font-medium mb-6">For Actors</h3>
-              
+
               <div className="flex gap-4">
                 <div className="flex-shrink-0 bg-blue-100 text-blue-700 rounded-full h-10 w-10 flex items-center justify-center">
                   1
@@ -156,7 +137,7 @@ export default function Home() {
                   </p>
                 </div>
               </div>
-              
+
               <div className="flex gap-4">
                 <div className="flex-shrink-0 bg-blue-100 text-blue-700 rounded-full h-10 w-10 flex items-center justify-center">
                   2
@@ -168,7 +149,7 @@ export default function Home() {
                   </p>
                 </div>
               </div>
-              
+
               <div className="flex gap-4">
                 <div className="flex-shrink-0 bg-blue-100 text-blue-700 rounded-full h-10 w-10 flex items-center justify-center">
                   3
@@ -181,10 +162,10 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            
+
             <div className="space-y-12">
               <h3 className="text-2xl font-medium mb-6">For Casting Directors</h3>
-              
+
               <div className="flex gap-4">
                 <div className="flex-shrink-0 bg-purple-100 text-purple-700 rounded-full h-10 w-10 flex items-center justify-center">
                   1
@@ -196,7 +177,7 @@ export default function Home() {
                   </p>
                 </div>
               </div>
-              
+
               <div className="flex gap-4">
                 <div className="flex-shrink-0 bg-purple-100 text-purple-700 rounded-full h-10 w-10 flex items-center justify-center">
                   2
@@ -208,7 +189,7 @@ export default function Home() {
                   </p>
                 </div>
               </div>
-              
+
               <div className="flex gap-4">
                 <div className="flex-shrink-0 bg-purple-100 text-purple-700 rounded-full h-10 w-10 flex items-center justify-center">
                   3
@@ -235,15 +216,15 @@ export default function Home() {
             Join thousands of actors and casting directors already using our platform
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Button 
-              size="lg" 
+            <Button
+              size="lg"
               onClick={handleGetStarted}
               className="bg-white text-primary hover:bg-primary-foreground font-medium"
             >
               Get Started Now
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               size="lg"
               className="border-white text-white hover:bg-white/10"
             >
@@ -264,7 +245,7 @@ export default function Home() {
               Join thousands of professionals who rely on our platform
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             <div className="text-center">
               <p className="text-4xl font-bold text-primary mb-2">5,000+</p>
