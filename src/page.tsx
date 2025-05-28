@@ -1,15 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Film, Clapperboard, UserCircle, ArrowRight, CheckCircle2 } from "lucide-react";
 
 export default function Home() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -26,9 +25,9 @@ export default function Home() {
   const handleGetStarted = () => {
     if (user) {
       // Check user role and redirect accordingly
-      router.push("/actor/dashboard");
+      navigate("/actor/dashboard");
     } else {
-      router.push("/auth/register");
+      navigate("/auth/register");
     }
   };
 
@@ -63,7 +62,7 @@ export default function Home() {
                 variant="outline" 
                 size="lg"
                 className="border-white text-white hover:bg-white/10"
-                onClick={() => router.push("/browse")}
+                onClick={() => navigate("/browse")}
               >
                 Browse Talent
               </Button>
@@ -247,9 +246,8 @@ export default function Home() {
               variant="outline" 
               size="lg"
               className="border-white text-white hover:bg-white/10"
-              asChild
             >
-              <Link href="/about">Learn More</Link>
+              <Link to="/about">Learn More</Link>
             </Button>
           </div>
         </div>
@@ -305,24 +303,24 @@ export default function Home() {
               <div>
                 <h3 className="font-medium mb-3">Platform</h3>
                 <ul className="space-y-2">
-                  <li><Link href="/about" className="text-muted-foreground hover:text-foreground">About</Link></li>
-                  <li><Link href="/features" className="text-muted-foreground hover:text-foreground">Features</Link></li>
-                  <li><Link href="/pricing" className="text-muted-foreground hover:text-foreground">Pricing</Link></li>
+                  <li><Link to="/about" className="text-muted-foreground hover:text-foreground">About</Link></li>
+                  <li><Link to="/features" className="text-muted-foreground hover:text-foreground">Features</Link></li>
+                  <li><Link to="/pricing" className="text-muted-foreground hover:text-foreground">Pricing</Link></li>
                 </ul>
               </div>
               <div>
                 <h3 className="font-medium mb-3">Resources</h3>
                 <ul className="space-y-2">
-                  <li><Link href="/blog" className="text-muted-foreground hover:text-foreground">Blog</Link></li>
-                  <li><Link href="/support" className="text-muted-foreground hover:text-foreground">Support</Link></li>
-                  <li><Link href="/contact" className="text-muted-foreground hover:text-foreground">Contact</Link></li>
+                  <li><Link to="/blog" className="text-muted-foreground hover:text-foreground">Blog</Link></li>
+                  <li><Link to="/support" className="text-muted-foreground hover:text-foreground">Support</Link></li>
+                  <li><Link to="/contact" className="text-muted-foreground hover:text-foreground">Contact</Link></li>
                 </ul>
               </div>
               <div>
                 <h3 className="font-medium mb-3">Legal</h3>
                 <ul className="space-y-2">
-                  <li><Link href="/terms" className="text-muted-foreground hover:text-foreground">Terms</Link></li>
-                  <li><Link href="/privacy" className="text-muted-foreground hover:text-foreground">Privacy</Link></li>
+                  <li><Link to="/terms" className="text-muted-foreground hover:text-foreground">Terms</Link></li>
+                  <li><Link to="/privacy" className="text-muted-foreground hover:text-foreground">Privacy</Link></li>
                 </ul>
               </div>
             </div>
