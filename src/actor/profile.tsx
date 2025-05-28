@@ -39,19 +39,9 @@ export default function ActorProfile() {
   const [success, setSuccess] = useState<string | null>(null);
   const [profile, setProfile] = useState<ActorProfile | null>(null);
 
-  const [skillsString, setSkillsString] = useState("");
-  const [languagesString, setLanguagesString] = useState("");
-
   useEffect(() => {
     checkUserAndLoadProfile();
   }, []);
-
-  useEffect(() => {
-    if (profile) {
-      setSkillsString(profile.skills ? Array.isArray(profile.skills) ? profile.skills.join(', ') : profile.skills : '');
-      setLanguagesString(profile.languages ? Array.isArray(profile.languages) ? profile.languages.join(', ') : profile.languages : '');
-    }
-  }, [profile]);
 
   const checkUserAndLoadProfile = async () => {
     try {
