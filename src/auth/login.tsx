@@ -55,6 +55,13 @@ export default function Login() {
           <CardDescription>
             Ingresa tus credenciales para acceder a tu cuenta
           </CardDescription>
+          <Button
+            variant="link"
+            asChild
+            className="mt-4 w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white py-2 px-4 rounded-md transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg"
+          >
+            <Link to="/page">Volver al Inicio</Link>
+          </Button>
         </CardHeader>
         <form onSubmit={handleLogin}>
           <CardContent className="space-y-4">
@@ -104,4 +111,4 @@ export default function Login() {
       </Card>
     </div>
   );
-} 
+}
