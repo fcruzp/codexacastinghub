@@ -1,15 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useToast } from '../components/ui/use-toast';
 import { supabase } from '../lib/supabase/client';
-import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { ProfilePhotoUpload } from '../components/actor/ProfilePhotoUpload';
 import { VideoUpload } from '../components/actor/VideoUpload';
 import { GalleryUpload } from '../components/actor/GalleryUpload';
 import { PersonalInfoForm } from '../components/actor/PersonalInfoForm';
 import { PhysicalInfoForm } from '../components/actor/PhysicalInfoForm';
 import { ExperienceForm } from '../components/actor/ExperienceForm';
-import { SkillsForm } from '../components/actor/SkillsForm';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -32,7 +29,6 @@ interface Profile {
 
 export default function Profile() {
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("personal");
@@ -99,44 +95,6 @@ export default function Profile() {
         description: "No se pudo cargar tu perfil. Por favor, intenta de nuevo.",
         variant: "destructive",
       });
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!profile) return;
-
-    try {
-      setIsSubmitting(true);
-
-      const languagesString = Array.isArray(profile.languages) 
-        ? profile.languages.join(',')
-        : profile.languages || '';
-
-      const { error } = await supabase
-        .from('actor_profiles')
-        .update({
-          ...profile,
-          languages: languagesString,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', profile.id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Perfil actualizado",
-        description: "Tu perfil ha sido actualizado exitosamente.",
-      });
-    } catch (error) {
-      console.error('Error al actualizar el perfil:', error);
-      toast({
-        title: "Error al actualizar el perfil",
-        description: "Hubo un problema al actualizar tu perfil. Por favor, intenta de nuevo.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 

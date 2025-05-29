@@ -352,7 +352,23 @@ export default function ActorProfile() {
                 {profile && (
                   <div className="space-y-4">
                     <Label>Galería de Imágenes</Label>
-                    <GalleryUpload />
+                    <GalleryUpload onUploadComplete={async (urls) => {
+                      try {
+                        const { error } = await supabase
+                          .from("actor_profiles")
+                          .update({ 
+                            gallery_urls: urls,
+                            updated_at: new Date().toISOString()
+                          })
+                          .eq("id", profile.id);
+
+                        if (error) throw error;
+                        setSuccess("Galería actualizada correctamente");
+                      } catch (error) {
+                        console.error('Error al actualizar la galería:', error);
+                        setError("Error al actualizar la galería");
+                      }
+                    }} />
                   </div>
                 )}
 

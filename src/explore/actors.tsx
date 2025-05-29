@@ -315,7 +315,7 @@ export default function ExploreActors() {
                     </p>
                     {actor.skills && actor.skills.length > 0 && (
                       <div className="mt-2 flex flex-wrap gap-1">
-                        {actor.skills.slice(0, 3).map((skill, index) => (
+                        {actor.skills.slice(0, 3).map((skill) => (
                           <span
                             key={skill}
                             className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-800"
