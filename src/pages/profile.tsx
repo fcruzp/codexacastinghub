@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useToast } from '../components/ui/use-toast';
 import { supabase } from '../lib/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';

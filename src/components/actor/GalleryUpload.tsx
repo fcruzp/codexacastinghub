@@ -14,35 +14,22 @@ import {
   Download
 } from 'lucide-react';
 import { Card, CardContent } from '../ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Alert, AlertDescription } from '../ui/alert';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 interface GalleryUploadProps {
   onUploadComplete: (urls: string[]) => Promise<void>;
 }
 
 const MAX_IMAGES = 10;
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB en bytes
 const ZOOM_STEP = 0.25;
 const MAX_ZOOM = 3;
 const MIN_ZOOM = 0.5;
 const STORAGE_BUCKET = 'actor_media';
-const STORAGE_PATH = 'gallery';
-
-interface PreviewImage {
-  file: File;
-  preview: string;
-}
 
 export function GalleryUpload({ onUploadComplete }: GalleryUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [images, setImages] = useState<string[]>([]);
-  const [previewImages, setPreviewImages] = useState<PreviewImage[]>([]);
-  const [showPreview, setShowPreview] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number>(-1);
   const [zoom, setZoom] = useState(1);
@@ -53,9 +40,9 @@ export function GalleryUpload({ onUploadComplete }: GalleryUploadProps) {
   // Limpiar las URLs de previsualización cuando el componente se desmonte
   useEffect(() => {
     return () => {
-      previewImages.forEach(image => URL.revokeObjectURL(image.preview));
+      images.forEach(image => URL.revokeObjectURL(image));
     };
-  }, [previewImages]);
+  }, [images]);
 
   // Función para cargar las imágenes existentes
   const loadExistingImages = async () => {
@@ -234,7 +221,7 @@ export function GalleryUpload({ onUploadComplete }: GalleryUploadProps) {
     setRotation(prev => (prev + 90) % 360);
   };
 
-  const handleDownload = async (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleDownload = async () => {
     if (!selectedImage) return;
     
     try {
@@ -310,7 +297,7 @@ export function GalleryUpload({ onUploadComplete }: GalleryUploadProps) {
           </p>
         </div>
         <div className="flex items-center space-x-2">
-          <Input
+          <input
             type="file"
             ref={fileInputRef}
             onChange={handleFileSelect}
