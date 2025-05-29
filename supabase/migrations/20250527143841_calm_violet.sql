@@ -157,17 +157,17 @@ ALTER TABLE casting_companies ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can view their own casting company"
   ON casting_companies
   FOR SELECT
-  USING (auth.uid() = user_id);
+  USING (auth.uid() = id);
 
 CREATE POLICY "Users can insert their own casting company"
   ON casting_companies
   FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+  WITH CHECK (auth.uid() = id);
 
 CREATE POLICY "Users can update their own casting company"
   ON casting_companies
   FOR UPDATE
-  USING (auth.uid() = user_id);
+  USING (auth.uid() = id);
 
 CREATE POLICY "Actors can view casting companies"
   ON casting_companies
