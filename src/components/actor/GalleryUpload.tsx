@@ -306,11 +306,17 @@ export function GalleryUpload({ onUploadComplete }: GalleryUploadProps) {
             className="hidden"
           />
           <Button
-            onClick={() => fileInputRef.current?.click()}
+            onClick={() => {
+              if (selectedFiles.length > 0) {
+                handleUpload();
+              } else {
+                fileInputRef.current?.click();
+              }
+            }}
             disabled={isUploading || images.length >= MAX_IMAGES}
           >
             <Upload className="w-4 h-4 mr-2" />
-            {isUploading ? "Subiendo..." : "Subir Imágenes"}
+            {isUploading ? "Subiendo..." : selectedFiles.length > 0 ? "Subir Imágenes" : "Seleccionar Imágenes"}
           </Button>
         </div>
       </div>
