@@ -18,9 +18,10 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Alert, AlertDescription } from '../ui/alert';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 interface GalleryUploadProps {
-  onSuccess?: () => void;
+  onUploadComplete: (urls: string[]) => Promise<void>;
 }
 
 const MAX_IMAGES = 10;
@@ -36,8 +37,9 @@ interface PreviewImage {
   preview: string;
 }
 
-export function GalleryUpload({ onSuccess }: GalleryUploadProps) {
-  const [loading, setLoading] = useState(false);
+export function GalleryUpload({ onUploadComplete }: GalleryUploadProps) {
+  const [isUploading, setIsUploading] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [images, setImages] = useState<string[]>([]);
   const [previewImages, setPreviewImages] = useState<PreviewImage[]>([]);
   const [showPreview, setShowPreview] = useState(false);
@@ -113,99 +115,52 @@ export function GalleryUpload({ onSuccess }: GalleryUploadProps) {
     loadImagesCallback();
   }, [loadImagesCallback]);
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files?.length) return;
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setSelectedFiles(Array.from(e.target.files));
+    }
+  };
 
-    setLoading(true);
+  const handleUpload = async () => {
+    if (selectedFiles.length === 0) return;
+
+    setIsUploading(true);
+    const uploadedUrls: string[] = [];
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) throw new Error("No hay usuario autenticado");
+      for (const file of selectedFiles) {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random()}.${fileExt}`;
+        const filePath = `gallery/${fileName}`;
 
-      console.log("Usuario autenticado:", user.id);
+        const { error: uploadError } = await supabase.storage
+          .from('actor-gallery')
+          .upload(filePath, file);
 
-      const uploadedUrls: string[] = [];
+        if (uploadError) throw uploadError;
 
-      // Subir cada imagen
-      for (const file of Array.from(files)) {
-        // Verificar el tipo de archivo
-        if (!file.type.startsWith('image/')) {
-          throw new Error(`El archivo ${file.name} no es una imagen válida`);
-        }
-
-        // Verificar el tamaño del archivo (10MB máximo)
-        if (file.size > MAX_FILE_SIZE) {
-          throw new Error(`El archivo ${file.name} excede el tamaño máximo permitido de 10MB`);
-        }
-
-        const fileExt = file.name.split(".").pop()?.toLowerCase();
-        if (!fileExt) {
-          throw new Error(`El archivo ${file.name} no tiene una extensión válida`);
-        }
-
-        // Crear un nuevo nombre de archivo
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-        const filePath = `${user.id}/gallery/${fileName}`;
-
-        console.log("Detalles de la subida:", {
-          bucket: STORAGE_BUCKET,
-          path: filePath,
-          fileSize: file.size,
-          fileType: file.type,
-          fileName: fileName,
-          fullPath: `${STORAGE_BUCKET}/${filePath}`
-        });
-
-        // Convertir el archivo a Blob para asegurar que se suba correctamente
-        const fileBlob = new Blob([await file.arrayBuffer()], { type: file.type });
-
-        // Intentar subir el archivo
-        const { data, error: uploadError } = await supabase.storage
-          .from(STORAGE_BUCKET)
-          .upload(filePath, fileBlob, {
-            cacheControl: '3600',
-            upsert: true, // Cambiado a true para permitir sobrescribir si existe
-            contentType: file.type
-          });
-
-        if (uploadError) {
-          console.error("Error detallado al subir:", uploadError);
-          throw new Error(`Error al subir ${file.name}: ${uploadError.message}`);
-        }
-
-        console.log("Archivo subido exitosamente:", data);
-
-        // Obtener URL pública de la imagen
         const { data: { publicUrl } } = supabase.storage
-          .from(STORAGE_BUCKET)
+          .from('actor-gallery')
           .getPublicUrl(filePath);
-
-        console.log("URL pública generada:", publicUrl);
 
         uploadedUrls.push(publicUrl);
       }
 
-      setImages(prev => [...prev, ...uploadedUrls]);
-      
+      await onUploadComplete(uploadedUrls);
+      setSelectedFiles([]);
       toast({
-        title: "Imágenes subidas exitosamente",
-        description: "Tus imágenes han sido agregadas a la galería.",
+        title: "Éxito",
+        description: "Imágenes subidas correctamente",
       });
-
-      if (onSuccess) {
-        onSuccess();
-      }
     } catch (error) {
-      console.error("Error al subir imágenes:", error);
+      console.error('Error al subir imágenes:', error);
       toast({
-        title: "Error al subir imágenes",
-        description: error instanceof Error ? error.message : "No se pudieron subir las imágenes. Por favor, intenta de nuevo.",
+        title: "Error",
+        description: "Error al subir las imágenes",
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      setIsUploading(false);
     }
   };
 
@@ -236,8 +191,8 @@ export function GalleryUpload({ onSuccess }: GalleryUploadProps) {
         description: "La imagen ha sido eliminada de tu galería.",
       });
 
-      if (onSuccess) {
-        onSuccess();
+      if (onUploadComplete) {
+        await onUploadComplete(images.filter(url => url !== imageUrl));
       }
     } catch (error) {
       console.error("Error al eliminar imagen:", error);
@@ -246,203 +201,6 @@ export function GalleryUpload({ onSuccess }: GalleryUploadProps) {
         description: "No se pudo eliminar la imagen. Por favor, intenta de nuevo.",
         variant: "destructive",
       });
-    }
-  };
-
-  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (!files || files.length === 0) return;
-
-    // Verificar si excederíamos el límite
-    if (images.length + files.length > MAX_IMAGES) {
-      toast({
-        title: "Límite de imágenes excedido",
-        description: `Solo puedes tener un máximo de ${MAX_IMAGES} imágenes en tu galería.`,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Verificar tipo y tamaño de archivos
-    const invalidFiles = Array.from(files).filter(file => {
-      const isValidType = file.type === 'image/jpeg' || file.type === 'image/png';
-      const isValidSize = file.size <= MAX_FILE_SIZE;
-      return !isValidType || !isValidSize;
-    });
-
-    if (invalidFiles.length > 0) {
-      const oversizedFiles = invalidFiles.filter(file => file.size > MAX_FILE_SIZE);
-      const invalidTypeFiles = invalidFiles.filter(file => 
-        file.type !== 'image/jpeg' && file.type !== 'image/png'
-      );
-
-      let errorMessage = '';
-      if (oversizedFiles.length > 0) {
-        errorMessage += `Los siguientes archivos exceden el límite de 10MB: ${oversizedFiles.map(f => f.name).join(', ')}`;
-      }
-      if (invalidTypeFiles.length > 0) {
-        if (errorMessage) errorMessage += '\n\n';
-        errorMessage += `Los siguientes archivos no son JPG o PNG: ${invalidTypeFiles.map(f => f.name).join(', ')}`;
-      }
-
-      toast({
-        title: "Archivos no válidos",
-        description: errorMessage,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) throw new Error("No hay usuario autenticado");
-
-      const uploadedUrls: string[] = [];
-
-      // Subir cada imagen
-      for (const file of Array.from(files)) {
-        const fileExt = file.name.split(".").pop()?.toLowerCase();
-        if (!fileExt) {
-          throw new Error(`El archivo ${file.name} no tiene una extensión válida`);
-        }
-
-        // Crear un nuevo nombre de archivo
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-        const filePath = `${user.id}/gallery/${fileName}`;
-
-        console.log("Intentando subir archivo:", {
-          bucket: STORAGE_BUCKET,
-          path: filePath,
-          fileSize: file.size,
-          fileType: file.type
-        });
-
-        // Intentar subir el archivo
-        const { data, error: uploadError } = await supabase.storage
-          .from(STORAGE_BUCKET)
-          .upload(filePath, file, {
-            cacheControl: '3600',
-            upsert: true,
-            contentType: file.type
-          });
-
-        if (uploadError) {
-          console.error("Error detallado al subir:", uploadError);
-          throw new Error(`Error al subir ${file.name}: ${uploadError.message}`);
-        }
-
-        console.log("Archivo subido exitosamente:", data);
-
-        // Obtener URL pública de la imagen
-        const { data: { publicUrl } } = supabase.storage
-          .from(STORAGE_BUCKET)
-          .getPublicUrl(filePath);
-
-        uploadedUrls.push(publicUrl);
-      }
-
-      setImages(prev => [...prev, ...uploadedUrls]);
-      
-      toast({
-        title: "Imágenes subidas exitosamente",
-        description: "Tus imágenes han sido agregadas a la galería.",
-      });
-
-      if (onSuccess) {
-        onSuccess();
-      }
-    } catch (error) {
-      console.error("Error al subir imágenes:", error);
-      toast({
-        title: "Error al subir imágenes",
-        description: error instanceof Error ? error.message : "No se pudieron subir las imágenes. Por favor, intenta de nuevo.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-      // Limpiar el input de archivo
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    }
-  };
-
-  const handleUpload = async () => {
-    if (previewImages.length === 0) return;
-
-    try {
-      setLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) throw new Error("No hay usuario autenticado");
-
-      const newUrls: string[] = [];
-
-      for (const previewImage of previewImages) {
-        const file = previewImage.file;
-        const fileExt = file.name.split(".").pop();
-        const fileName = `${user.id}-${Date.now()}-${Math.random()}.${fileExt}`;
-        const filePath = `${STORAGE_PATH}/${fileName}`;
-
-        // Subir el archivo a Supabase Storage
-        const { error: uploadError } = await supabase.storage
-          .from(STORAGE_BUCKET)
-          .upload(filePath, file);
-
-        if (uploadError) throw uploadError;
-
-        // Obtener la URL pública del archivo
-        const { data: { publicUrl } } = supabase.storage
-          .from(STORAGE_BUCKET)
-          .getPublicUrl(filePath);
-
-        newUrls.push(publicUrl);
-      }
-
-      // Actualizar la base de datos con las nuevas URLs
-      const updatedUrls = [...images, ...newUrls];
-      const { error: updateError } = await supabase
-        .from("actor_profiles")
-        .upsert({
-          user_id: user.id,
-          photos: updatedUrls,
-          updated_at: new Date().toISOString(),
-        });
-
-      if (updateError) throw updateError;
-
-      setImages(updatedUrls);
-      setShowPreview(false);
-      setPreviewImages([]);
-      
-      toast({
-        title: "Imágenes subidas exitosamente",
-        description: "Tus imágenes han sido agregadas a la galería.",
-      });
-
-      if (onSuccess) {
-        onSuccess();
-      }
-    } catch (error) {
-      console.error("Error al subir imágenes:", error);
-      toast({
-        title: "Error al subir imágenes",
-        description: "No se pudieron subir las imágenes. Por favor, intenta de nuevo.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCancelPreview = () => {
-    setShowPreview(false);
-    setPreviewImages([]);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
     }
   };
 
@@ -552,20 +310,20 @@ export function GalleryUpload({ onSuccess }: GalleryUploadProps) {
           </p>
         </div>
         <div className="flex items-center space-x-2">
-          <input
+          <Input
             type="file"
             ref={fileInputRef}
             onChange={handleFileSelect}
-            accept="image/jpeg,image/png"
+            accept="image/*"
             multiple
             className="hidden"
           />
           <Button
             onClick={() => fileInputRef.current?.click()}
-            disabled={loading || images.length >= MAX_IMAGES}
+            disabled={isUploading || images.length >= MAX_IMAGES}
           >
             <Upload className="w-4 h-4 mr-2" />
-            {loading ? "Subiendo..." : "Subir Imágenes"}
+            {isUploading ? "Subiendo..." : "Subir Imágenes"}
           </Button>
         </div>
       </div>

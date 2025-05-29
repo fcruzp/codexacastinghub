@@ -1,17 +1,11 @@
-import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { supabase } from '../lib/supabase/client';
 import { useAuth } from '../contexts/AuthContext';
 
-interface User {
-  id: string;
-  email?: string;
-}
-
 export function Navbar() {
   const navigate = useNavigate();
-  const { user, userType, userRole, loading } = useAuth();
+  const { user, userRole, loading } = useAuth();
 
   const handleSignOut = async () => {
     try {

@@ -12,11 +12,9 @@ import ActorProfile from "./actor/profile";
 import CastingProfile from "./casting/profile";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import ExploreActors from "./explore/actors";
-import Profile from "./pages/profile";
 import Welcome from "@/pages/welcome";
 import Landing from "@/pages/landing";
 import { AuthProvider } from "./contexts/AuthContext";
-import AppRoutes from "./routes";
 
 // Componente Layout
 function Layout() {

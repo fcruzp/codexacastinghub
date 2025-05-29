@@ -1,54 +1,56 @@
-import { useState } from 'react';
-import { Button } from '../ui/button';
-import { supabase } from '../../lib/supabase/client';
-import { useToast } from '../ui/use-toast';
-import { Upload, X } from 'lucide-react';
+import { useState, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { supabase } from "@/lib/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 interface ProfileImageUploadProps {
-  actorId: string;
-  onUploadComplete: (url: string) => void;
+  onUploadComplete: (url: string) => Promise<void>;
 }
 
-export function ProfileImageUpload({ actorId, onUploadComplete }: ProfileImageUploadProps) {
+export function ProfileImageUpload({ onUploadComplete }: ProfileImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const { toast } = useToast();
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!selectedFile) return;
+
+    setIsUploading(true);
 
     try {
-      setIsUploading(true);
+      const fileExt = selectedFile.name.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `profile/${fileName}`;
 
-      // Crear la ruta del archivo en el bucket
-      const filePath = `${actorId}/profile/${file.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from('actor-profiles')
+        .upload(filePath, selectedFile);
 
-      // Subir el archivo a Supabase Storage
-      const { data, error } = await supabase.storage
-        .from('actor_media')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: true
-        });
+      if (uploadError) throw uploadError;
 
-      if (error) throw error;
-
-      // Obtener la URL pública del archivo
       const { data: { publicUrl } } = supabase.storage
-        .from('actor_media')
+        .from('actor-profiles')
         .getPublicUrl(filePath);
 
-      onUploadComplete(publicUrl);
-      
+      await onUploadComplete(publicUrl);
+      setSelectedFile(null);
       toast({
-        title: "Imagen subida exitosamente",
-        description: "Tu imagen de perfil ha sido actualizada.",
+        title: "Éxito",
+        description: "Imagen de perfil actualizada correctamente",
       });
     } catch (error) {
-      console.error('Error al subir la imagen:', error);
+      console.error('Error al subir imagen:', error);
       toast({
-        title: "Error al subir la imagen",
-        description: "Hubo un problema al subir tu imagen. Por favor, intenta de nuevo.",
+        title: "Error",
+        description: "Error al subir la imagen de perfil",
         variant: "destructive",
       });
     } finally {
@@ -57,24 +59,25 @@ export function ProfileImageUpload({ actorId, onUploadComplete }: ProfileImageUp
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-4">
-        <Button
-          variant="outline"
-          className="relative"
-          disabled={isUploading}
-        >
-          <input
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline">Cambiar Foto de Perfil</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <div className="space-y-4">
+          <Input
             type="file"
             accept="image/*"
-            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-            onChange={handleFileUpload}
-            disabled={isUploading}
+            onChange={handleFileSelect}
           />
-          <Upload className="h-4 w-4 mr-2" />
-          {isUploading ? 'Subiendo...' : 'Subir imagen de perfil'}
-        </Button>
-      </div>
-    </div>
+          <Button
+            onClick={handleUpload}
+            disabled={isUploading || !selectedFile}
+          >
+            {isUploading ? "Subiendo..." : "Subir"}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 } 

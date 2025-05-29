@@ -150,18 +150,13 @@ export default function ActorProfile() {
     setSuccess(null);
 
     try {
-      // Convertir languages y skills a arrays si son strings
-      const languagesArray = typeof profile.languages === 'string' 
-        ? profile.languages.split(',').map(lang => lang.trim())
-        : Array.isArray(profile.languages) 
-          ? profile.languages 
-          : [];
+      // Corregir el manejo de languages
+      const languages = profile.languages || [];
+      const languageList = languages.map((lang: string) => lang.trim());
 
-      const skillsArray = typeof profile.skills === 'string'
-        ? profile.skills.split(',').map(skill => skill.trim())
-        : Array.isArray(profile.skills)
-          ? profile.skills
-          : [];
+      // Corregir el manejo de skills
+      const skills = profile.skills || [];
+      const skillList = skills.map((skill: string) => skill.trim());
 
       const updateData = {
         first_name: profile.first_name === '' ? null : profile.first_name,
@@ -174,8 +169,8 @@ export default function ActorProfile() {
         weight_kg: profile.weight_kg,
         eye_color: profile.eye_color === '' ? null : profile.eye_color,
         hair_color: profile.hair_color === '' ? null : profile.hair_color,
-        languages: languagesArray,
-        skills: skillsArray,
+        languages: languageList,
+        skills: skillList,
         biography: profile.biography === '' ? null : profile.biography,
         location_city: profile.location_city === '' ? null : profile.location_city,
         location_country: profile.location_country === '' ? null : profile.location_country,
@@ -360,9 +355,7 @@ export default function ActorProfile() {
                 {profile && (
                   <div className="space-y-4">
                     <Label>Galería de Imágenes</Label>
-                    <GalleryUpload 
-                      actorId={profile.id}
-                    />
+                    <GalleryUpload onUploadComplete={handleGalleryUpdate} />
                   </div>
                 )}
 
