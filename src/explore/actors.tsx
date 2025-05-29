@@ -289,50 +289,52 @@ export default function ExploreActors() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {actors.map((actor) => (
-          <Card key={actor.id} className="cursor-pointer hover:shadow-lg transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                {actor.profile_image_url ? (
-                  <img
-                    src={actor.profile_image_url}
-                    alt={`${actor.first_name} ${actor.last_name}`}
-                    className="w-20 h-20 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center">
-                    <span className="text-2xl text-gray-400">
-                      {actor.first_name?.[0] || "?"}
-                    </span>
-                  </div>
-                )}
-                <div>
-                  <h3 className="font-semibold">
-                    {actor.stage_name || `${actor.first_name} ${actor.last_name}`}
-                  </h3>
-                  <p className="text-sm text-gray-500">
-                    {actor.location_city}, {actor.location_country}
-                  </p>
-                  {actor.skills && actor.skills.length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-1">
-                      {actor.skills.slice(0, 3).map((skill, index) => (
-                        <span
-                          key={skill}
-                          className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-800"
-                        >
-                          {skill}
-                        </span>
-                      ))}
-                      {actor.skills.length > 3 && (
-                        <span className="text-xs text-gray-500">
-                          +{actor.skills.length - 3} más
-                        </span>
-                      )}
+          <div key={actor.id} className="actor-card">
+            <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4">
+                  {actor.profile_image_url ? (
+                    <img
+                      src={actor.profile_image_url}
+                      alt={`${actor.first_name} ${actor.last_name}`}
+                      className="w-20 h-20 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center">
+                      <span className="text-2xl text-gray-400">
+                        {actor.first_name?.[0] || "?"}
+                      </span>
                     </div>
                   )}
+                  <div>
+                    <h3 className="font-semibold">
+                      {actor.stage_name || `${actor.first_name} ${actor.last_name}`}
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      {actor.location_city}, {actor.location_country}
+                    </p>
+                    {actor.skills && actor.skills.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {actor.skills.slice(0, 3).map((skill, index) => (
+                          <span
+                            key={skill}
+                            className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-800"
+                          >
+                            {skill}
+                          </span>
+                        ))}
+                        {actor.skills.length > 3 && (
+                          <span className="text-xs text-gray-500">
+                            +{actor.skills.length - 3} más
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         ))}
       </div>
     </div>

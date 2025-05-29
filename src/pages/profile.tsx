@@ -147,6 +147,15 @@ export default function Profile() {
     });
   };
 
+  const handleGalleryUpdate = async (urls: string[]) => {
+    try {
+      // Implementar la lógica de actualización de galería
+      console.log('URLs de galería actualizadas:', urls);
+    } catch (error) {
+      console.error('Error al actualizar la galería:', error);
+    }
+  };
+
   if (!profile) {
     return <div>Cargando perfil...</div>;
   }
@@ -184,7 +193,7 @@ export default function Profile() {
             </TabsContent>
 
             <TabsContent value="gallery" className="mt-6">
-              <GalleryUpload onSuccess={handleSuccess} />
+              <GalleryUpload onUploadComplete={handleGalleryUpdate} />
             </TabsContent>
           </Tabs>
         </CardContent>

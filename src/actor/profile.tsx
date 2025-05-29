@@ -210,6 +210,8 @@ export default function ActorProfile() {
   };
 
   const handleProfileImageUpdate = async (url: string) => {
+    if (!profile) return;
+    
     try {
       const { error } = await supabase
         .from("actor_profiles")
@@ -222,10 +224,6 @@ export default function ActorProfile() {
     } catch (error) {
       console.error('Error al actualizar la imagen de perfil:', error);
     }
-  };
-
-  const handleGalleryUpdate = async (urls: string[]) => {
-    // Ya no necesitamos esta función
   };
 
   const handleYouTubeLinksUpdate = async (links: string[]) => {
@@ -336,7 +334,6 @@ export default function ActorProfile() {
                   <div className="space-y-4">
                     <Label>Imagen de Perfil</Label>
                     <ProfileImageUpload 
-                      actorId={profile.id} 
                       onUploadComplete={handleProfileImageUpdate}
                     />
                     {profile.profile_image_url && (
@@ -355,7 +352,7 @@ export default function ActorProfile() {
                 {profile && (
                   <div className="space-y-4">
                     <Label>Galería de Imágenes</Label>
-                    <GalleryUpload onUploadComplete={handleGalleryUpdate} />
+                    <GalleryUpload />
                   </div>
                 )}
 
