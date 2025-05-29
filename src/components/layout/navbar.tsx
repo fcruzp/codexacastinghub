@@ -36,8 +36,8 @@ export function Navbar() {
         console.log("Usuario ha cerrado sesión");
         setUser(null);
         setUserType(null);
-        // Redirigir a la página de inicio después de cerrar sesión
-        navigate("/");
+        // Redirigir a la landing page después de cerrar sesión
+        navigate("/page");
       }
     });
 
@@ -116,7 +116,7 @@ export function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo y enlaces principales */}
           <div className="flex items-center">
-            <Link to="/" className="text-xl font-bold">
+            <Link to="/page" className="text-xl font-bold">
               CastingApp
             </Link>
             <div className="hidden md:flex items-center space-x-4 ml-8">
@@ -124,10 +124,10 @@ export function Navbar() {
                 Explorar
               </Link>
               <Link to="/features" className="text-sm font-medium hover:text-primary">
-                Características
+                Funcionalidades
               </Link>
               <Link to="/pricing" className="text-sm font-medium hover:text-primary">
-                Precios
+                Planes y Precios
               </Link>
               <Link to="/about" className="text-sm font-medium hover:text-primary">
                 Acerca de
@@ -158,7 +158,7 @@ export function Navbar() {
                   <div className="px-4 py-2 text-sm">
                     <p className="font-medium">{user.email}</p>
                     <p className="text-muted-foreground">
-                      {userType === "actor" ? "Actor" : "Casting Director"}
+                      {userType === "actor" ? "Actor/Actriz" : "Director de Casting"}
                     </p>
                   </div>
                   <DropdownMenuItem asChild>
@@ -168,7 +168,7 @@ export function Navbar() {
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link to={userType === "actor" ? "/actor/dashboard" : "/casting/dashboard"}>
-                      Dashboard
+                      Panel de Control
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleSignOut}>
@@ -215,14 +215,14 @@ export function Navbar() {
               className="block text-sm font-medium hover:text-primary"
               onClick={() => setIsMenuOpen(false)}
             >
-              Características
+              Funcionalidades
             </Link>
             <Link
               to="/pricing"
               className="block text-sm font-medium hover:text-primary"
               onClick={() => setIsMenuOpen(false)}
             >
-              Precios
+              Planes y Precios
             </Link>
             <Link
               to="/about"
