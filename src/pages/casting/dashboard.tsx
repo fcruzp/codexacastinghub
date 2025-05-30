@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState, useNavigate } from "react";
 import { supabase } from "@/lib/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -50,20 +49,6 @@ export default function CastingDashboard() {
       if (!user) {
         navigate("/auth/login");
         return;
-      }
-
-      const { data: userData, error: userDataError } = await supabase
-        .from("casting_companies")
-        .select("id")
-        .eq("id", user.id)
-        .single();
-
-      if (userDataError) {
-        if (userDataError.code === 'PGRST116') {
-          navigate("/casting/profile");
-          return;
-        }
-        throw userDataError;
       }
 
       await loadActors();

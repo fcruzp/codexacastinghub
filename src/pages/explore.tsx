@@ -48,8 +48,7 @@ export default function Explore() {
   const [projects, setProjects] = useState<CastingProject[]>([]);
   const [actors, setActors] = useState<ActorProfile[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [error, setError] = useState<string | null>(null);
+  const [statusFilter] = useState<string>("");
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -118,7 +117,6 @@ export default function Explore() {
       }
     } catch (error) {
       console.error("Error en checkUserType:", error);
-      setError(error instanceof Error ? error.message : "Error al cargar el rol de usuario");
       setIsAuthenticated(false);
     } finally {
       setLoading(false);
@@ -145,7 +143,6 @@ export default function Explore() {
       setProjects(formattedProjects);
     } catch (error) {
       console.error("Error loading projects:", error);
-      setError(error instanceof Error ? error.message : "Error al cargar proyectos");
     }
   };
 
@@ -160,7 +157,6 @@ export default function Explore() {
       setActors(data);
     } catch (error) {
       console.error("Error loading actors:", error);
-      setError(error instanceof Error ? error.message : "Error al cargar actores");
     }
   };
 

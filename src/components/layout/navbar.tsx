@@ -15,8 +15,7 @@ import { useAuth } from "../../contexts/AuthContext";
 export default function Navbar() {
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
-  const { user } = useAuth();
-  const [userType, setUserType] = useState<"actor" | "casting_agent" | null>(null);
+  const { user, userType } = useAuth();
   const [loading, setLoading] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 

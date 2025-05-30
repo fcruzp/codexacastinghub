@@ -7,7 +7,6 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { MapPin, Phone, Mail, Youtube } from "lucide-react";
 import { ImageViewer } from "@/components/ui/image-viewer";
-import { useAuth } from "@/contexts/AuthContext";
 
 interface ActorProfile {
   id: string;
@@ -41,7 +40,6 @@ export default function ViewActorProfile() {
   const [error, setError] = useState<string | null>(null);
   const [profile, setProfile] = useState<ActorProfile | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const { user } = useAuth();
 
   useEffect(() => {
     if (id) {
