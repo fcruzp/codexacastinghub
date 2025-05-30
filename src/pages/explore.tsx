@@ -48,7 +48,6 @@ export default function Explore() {
   const [projects, setProjects] = useState<CastingProject[]>([]);
   const [actors, setActors] = useState<ActorProfile[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter] = useState<string>("");
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -163,8 +162,7 @@ export default function Explore() {
   const filteredProjects = projects.filter(project => {
     const matchesSearch = project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          project.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "all" || project.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    return matchesSearch;
   });
 
   const filteredActors = actors.filter(actor => {

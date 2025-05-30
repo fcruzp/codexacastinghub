@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useTheme } from "../providers/theme-provider";
 import { Button } from "../ui/button";
 import { Moon, Sun, User, LogOut, Menu, X } from "lucide-react";
@@ -14,61 +14,8 @@ import { useAuth } from "../../contexts/AuthContext";
 
 export default function Navbar() {
   const { theme, setTheme } = useTheme();
-  const navigate = useNavigate();
   const { user, userType } = useAuth();
-  const [loading, setLoading] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        if (error) throw error;
-        
-        if (session?.user) {
-          await checkUserType(session.user.id);
-        } else {
-          setUserType(null);
-        }
-      } catch (error) {
-        console.error("Error checking session:", error);
-        setUserType(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    checkSession();
-  }, []);
-
-  const checkUserType = async (userId: string) => {
-    try {
-      const { data: userData, error: userDataError } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", userId)
-        .single();
-
-      if (userDataError) throw userDataError;
-
-      if (!userData || !userData.role) {
-        throw new Error("No se encontró el rol de usuario");
-      }
-
-      const role = userData.role.toLowerCase();
-      
-      if (role === "actor") {
-        setUserType("actor");
-      } else if (role === "casting_agent") {
-        setUserType("casting_agent");
-      } else {
-        setUserType(null);
-      }
-    } catch (error) {
-      console.error("Error checking user type:", error);
-      setUserType(null);
-    }
-  };
 
   const handleSignOut = async () => {
     console.log("handleSignOut: Iniciando cierre de sesión...");
@@ -76,16 +23,14 @@ export default function Navbar() {
       console.log("handleSignOut: Llamando a supabase.auth.signOut()...");
       const { error } = await supabase.auth.signOut().catch(err => {
         console.error("handleSignOut: Error en la promesa de signOut", err);
-        return { error: err }; // Devolvemos el error para que el try/catch principal lo maneje también si es necesario
+        return { error: err };
       });
 
       console.log("handleSignOut: Resultado de signOut", { error });
       if (error) {
         console.error("handleSignOut: Error al cerrar sesión:", error);
-        // Opcional: Mostrar un mensaje de error al usuario
       } else {
         console.log("handleSignOut: Llamada a signOut exitosa. Esperando onAuthStateChange...");
-        // Supabase.auth.onAuthStateChange manejará la limpieza del usuario y la redirección
       }
     } catch (error) {
       console.error("handleSignOut: Excepción al cerrar sesión:", error);
