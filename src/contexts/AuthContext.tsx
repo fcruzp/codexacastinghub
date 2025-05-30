@@ -1,71 +1,68 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase/client';
+import { User } from "@supabase/supabase-js";
 
 interface AuthContextType {
-  user: any;
-  userType: 'actor' | 'casting' | null;
+  user: User | null;
+  userType: 'actor' | 'casting_agent' | null;
   userRole: string | null;
   loading: boolean;
 }
 
-const AuthContext = createContext<AuthContextType>({
+const defaultContext: AuthContextType = {
   user: null,
   userType: null,
   userRole: null,
   loading: true,
-});
+};
+
+export const AuthContext = createContext<AuthContextType>(defaultContext);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<any>(null);
-  const [userType, setUserType] = useState<'actor' | 'casting' | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [userType, setUserType] = useState<'actor' | 'casting_agent' | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const checkUserType = async (userId: string) => {
     console.log('🔄 AuthContext - Iniciando checkUserType para userId:', userId);
     try {
-      // Verificar primero si es casting
-      console.log('🔍 AuthContext - Consultando casting_companies...');
-      const { data: castingData, error: castingError } = await supabase
-        .from("casting_companies")
-        .select("id")
+      const { data: userData, error: userDataError } = await supabase
+        .from("profiles")
+        .select("role")
         .eq("id", userId)
-        .maybeSingle();
+        .single();
 
-      if (castingError) {
-        console.warn('⚠️ AuthContext - Error al verificar casting:', castingError);
-        return;
+      if (userDataError) {
+        console.error("❌ AuthContext - Error al obtener rol de usuario:", userDataError);
+        throw userDataError;
       }
 
-      // Si es casting, no necesitamos verificar actor_profiles
-      if (castingData) {
-        console.log('✅ AuthContext - Usuario es Casting Director');
-        setUserType("casting");
-        return;
+      console.log("✅ AuthContext - Datos del usuario:", userData);
+      
+      if (!userData || !userData.role) {
+        console.error("❌ AuthContext - No se encontró el rol de usuario");
+        throw new Error("No se encontró el rol de usuario");
       }
 
-      // Si no es casting, verificar si es actor
-      console.log('🔍 AuthContext - Consultando actor_profiles...');
-      const { data: actorData, error: actorError } = await supabase
-        .from("actor_profiles")
-        .select("id")
-        .eq("id", userId)
-        .maybeSingle();
+      const role = userData.role.toLowerCase();
+      console.log("✅ AuthContext - Rol de usuario:", role);
 
-      if (actorError) {
-        console.warn('⚠️ AuthContext - Error al verificar actor:', actorError);
-        return;
-      }
-
-      if (actorData) {
-        console.log('✅ AuthContext - Usuario es Actor');
+      if (role === "casting_agent") {
+        setUserType("casting_agent");
+        setUserRole("casting_agent");
+      } else if (role === "actor") {
         setUserType("actor");
+        setUserRole("actor");
       } else {
-        console.log('ℹ️ AuthContext - Usuario sin tipo definido');
+        console.error("❌ AuthContext - Rol de usuario no válido:", role);
         setUserType(null);
+        setUserRole(null);
       }
     } catch (error) {
       console.error("❌ AuthContext - Error general en checkUserType:", error);
+      setUserType(null);
+      setUserRole(null);
     }
   };
 

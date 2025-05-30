@@ -5,17 +5,16 @@ import { useAuth } from '../contexts/AuthContext';
 
 export function Navbar() {
   const navigate = useNavigate();
-  const { user, userRole, loading } = useAuth();
+  const { user, userType, loading } = useAuth();
 
   const handleSignOut = async () => {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-      navigate("/");
+      navigate("/page");
     } catch (error) {
       console.warn('Error al cerrar sesión:', error);
-      // Intentar navegar al home incluso si hay error
-      navigate("/");
+      navigate("/page");
     }
   };
 
@@ -24,7 +23,7 @@ export function Navbar() {
       <nav className="border-b">
         <div className="container mx-auto px-4">
           <div className="flex h-16 items-center justify-between">
-            <Link to="/" className="text-xl font-bold">
+            <Link to="/page" className="text-xl font-bold">
               Casting
             </Link>
           </div>
@@ -38,16 +37,19 @@ export function Navbar() {
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link to="/" className="text-xl font-bold">
+            <Link to="/page" className="text-xl font-bold">
               Casting
             </Link>
             {user && (
               <div className="flex items-center gap-4">
-                <Link to="/profile" className="text-sm hover:text-primary">
+                <Link 
+                  to={userType === 'casting_agent' ? "/casting/profile" : "/actor/profile"} 
+                  className="text-sm hover:text-primary"
+                >
                   Mi Perfil
                 </Link>
-                {userRole === 'director' && (
-                  <Link to="/explore/actors" className="text-sm hover:text-primary">
+                {userType === 'casting_agent' && (
+                  <Link to="/explore" className="text-sm hover:text-primary">
                     Explorar Actores
                   </Link>
                 )}

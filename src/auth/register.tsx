@@ -10,76 +10,67 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 
 export default function Register() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [userType, setUserType] = useState<"actor" | "casting">("actor");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [userType, setUserType] = useState<"actor" | "casting_agent">("actor");
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    confirmPassword: "",
+    firstName: "",
+    lastName: "",
+    stageName: "",
+    companyName: "",
+  });
 
-  const handleRegister = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError(null);
-
-    if (password !== confirmPassword) {
-      setError("Las contraseñas no coinciden");
-      setLoading(false);
-      return;
-    }
+    setLoading(true);
 
     try {
-      // 1. Registrar el usuario en auth.users
-      const { error: signUpError, data } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            user_type: userType,
-          },
-        },
+      if (formData.password !== formData.confirmPassword) {
+        throw new Error("Las contraseñas no coinciden");
+      }
+
+      const { data: { user }, error: signUpError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
       });
 
       if (signUpError) throw signUpError;
+      if (!user) throw new Error("Error al crear el usuario");
 
-      // 2. Crear el perfil en la tabla correspondiente
-      if (data.user) {
-        if (userType === "actor") {
-          const { error: profileError } = await supabase
-            .from("actor_profiles")
-            .insert([
-              {
-                id: data.user.id,
-                first_name: "", // Estos campos se pueden actualizar después
-                last_name: "",
-                gender: "other"
-              },
-            ]);
+      // Crear el perfil según el tipo de usuario
+      if (userType === "actor") {
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .insert({
+            id: user.id,
+            role: "actor",
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+            stage_name: formData.stageName,
+          });
 
-          if (profileError) throw profileError;
-        } else {
-          const { error: companyError } = await supabase
-            .from("casting_companies")
-            .insert([
-              {
-                id: data.user.id,
-                company_name: "", // Estos campos se pueden actualizar después
-                contact_name: ""
-              },
-            ]);
+        if (profileError) throw profileError;
+      } else {
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .insert({
+            id: user.id,
+            role: "casting_agent",
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+          });
 
-          if (companyError) throw companyError;
-        }
-
-        // Redirigir al perfil correspondiente
-        if (userType === "actor") {
-          navigate("/actor/profile");
-        } else {
-          navigate("/casting/profile");
-        }
+        if (profileError) throw profileError;
       }
-    } catch (err: any) {
-      setError(err.message);
+
+      navigate("/auth/login");
+    } catch (error) {
+      console.error("Error en registro:", error);
+      setError(error instanceof Error ? error.message : "Error al registrar usuario");
     } finally {
       setLoading(false);
     }
@@ -101,7 +92,7 @@ export default function Register() {
             <Link to="/page">Volver al Inicio</Link>
           </Button>
         </CardHeader>
-        <form onSubmit={handleRegister}>
+        <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             {error && (
               <Alert variant="destructive">
@@ -114,8 +105,8 @@ export default function Register() {
                 id="email"
                 type="email"
                 placeholder="tu@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
               />
             </div>
@@ -124,8 +115,8 @@ export default function Register() {
               <Input
                 id="password"
                 type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 required
               />
             </div>
@@ -134,23 +125,61 @@ export default function Register() {
               <Input
                 id="confirmPassword"
                 type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
+                value={formData.confirmPassword}
+                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                 required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="firstName">Nombre</Label>
+              <Input
+                id="firstName"
+                type="text"
+                value={formData.firstName}
+                onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="lastName">Apellido</Label>
+              <Input
+                id="lastName"
+                type="text"
+                value={formData.lastName}
+                onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="stageName">Nombre de Escena</Label>
+              <Input
+                id="stageName"
+                type="text"
+                value={formData.stageName}
+                onChange={(e) => setFormData({ ...formData, stageName: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="companyName">Nombre de la Compañía</Label>
+              <Input
+                id="companyName"
+                type="text"
+                value={formData.companyName}
+                onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="userType">Tipo de Usuario</Label>
               <Select
                 value={userType}
-                onValueChange={(value: "actor" | "casting") => setUserType(value)}
+                onValueChange={(value: "actor" | "casting_agent") => setUserType(value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecciona tu tipo de usuario" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="actor">Actor</SelectItem>
-                  <SelectItem value="casting">Casting Director</SelectItem>
+                  <SelectItem value="actor">Actor/Actriz</SelectItem>
+                  <SelectItem value="casting_agent">Agente de Casting</SelectItem>
                 </SelectContent>
               </Select>
             </div>

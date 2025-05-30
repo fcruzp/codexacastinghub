@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredUserType?: "actor" | "casting" | "director";
+  requiredUserType?: "actor" | "casting_agent";
 }
 
 export default function ProtectedRoute({ children, requiredUserType }: ProtectedRouteProps) {
@@ -32,7 +32,7 @@ export default function ProtectedRoute({ children, requiredUserType }: Protected
           // Verificar si el usuario tiene el tipo requerido
           if (userType !== requiredUserType) {
             console.log(`Usuario es ${userType} pero se requiere ${requiredUserType}`);
-            navigate(userType === "casting" ? "/casting/profile" : "/actor/profile");
+            navigate(userType === "casting_agent" ? "/casting/profile" : "/actor/profile");
             return;
           }
         }
@@ -53,6 +53,22 @@ export default function ProtectedRoute({ children, requiredUserType }: Protected
         <div className="text-center">Cargando...</div>
       </div>
     );
+  }
+
+  if (!user) {
+    return <Navigate to="/auth/login" />;
+  }
+
+  if (requiredUserType) {
+    if (!userType) {
+      return <Navigate to="/auth/login" />;
+    }
+
+    if (userType !== requiredUserType) {
+      console.log(`Usuario es ${userType} pero se requiere ${requiredUserType}`);
+      navigate(userType === "casting_agent" ? "/casting/profile" : "/actor/profile");
+      return null;
+    }
   }
 
   return <>{children}</>;

@@ -28,17 +28,21 @@ export default function Login() {
       if (signInError) throw signInError;
 
       // Verificar el tipo de usuario
-      const { data: actorData } = await supabase
-        .from("actor_profiles")
-        .select("id")
+      const { data: userData, error: userDataError } = await supabase
+        .from("profiles")
+        .select("role")
         .eq("id", data.user.id)
         .single();
 
+      if (userDataError) throw userDataError;
+
       // Redirigir según el tipo de usuario
-      if (actorData) {
+      if (userData.role === "actor") {
         navigate("/actor/profile");
-      } else {
+      } else if (userData.role === "casting_agent") {
         navigate("/casting/profile");
+      } else {
+        throw new Error("Rol de usuario no válido");
       }
     } catch (err: any) {
       setError(err.message);

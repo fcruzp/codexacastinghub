@@ -1,10 +1,12 @@
 import { useNavigate, Link } from "react-router-dom";
-import { Film, Clapperboard, UserCircle, ArrowRight } from "lucide-react";
+import { Film, Clapperboard, UserCircle, ArrowRight, Check } from "lucide-react";
 import { Button } from "./components/ui/button";
 import { Card, CardContent } from "./components/ui/card";
+import { useAuth } from "./contexts/AuthContext";
 
 export default function Home() {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const handleGetStarted = () => {
     navigate("/auth/register");
@@ -33,6 +35,7 @@ export default function Home() {
                 size="lg"
                 onClick={handleGetStarted}
                 className="bg-white text-blue-900 hover:bg-blue-50 font-medium"
+                disabled={!!user}
               >
                 Comenzar
                 <ArrowRight className="ml-2 h-5 w-5" />
@@ -41,7 +44,7 @@ export default function Home() {
                 variant="outline"
                 size="lg"
                 className="border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
-                onClick={() => navigate("/browse")}
+                onClick={() => navigate("/explore")}
               >
                 Explorar Talento
               </Button>
@@ -204,6 +207,137 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Pricing section - Solo visible si no hay usuario */}
+      {!user && (
+        <section className="py-16 bg-muted/40">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4">
+                Planes y Precios
+              </h2>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                Elige el plan que mejor se adapte a tus necesidades
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+              {/* Plan Gratuito */}
+              <Card className="relative overflow-hidden border-2">
+                <div className="absolute top-0 right-0 bg-primary/10 px-4 py-1 rounded-bl-lg text-sm font-medium text-primary">
+                  Popular
+                </div>
+                <CardContent className="p-6">
+                  <h3 className="text-2xl font-bold mb-2">Plan Gratuito</h3>
+                  <div className="mb-4">
+                    <span className="text-4xl font-bold">$0</span>
+                    <span className="text-muted-foreground">/mes</span>
+                  </div>
+                  <ul className="space-y-3 mb-6">
+                    <li className="flex items-center">
+                      <Check className="h-5 w-5 text-primary mr-2" />
+                      <span>Perfil básico</span>
+                    </li>
+                    <li className="flex items-center">
+                      <Check className="h-5 w-5 text-primary mr-2" />
+                      <span>Subir hasta 5 fotos</span>
+                    </li>
+                    <li className="flex items-center">
+                      <Check className="h-5 w-5 text-primary mr-2" />
+                      <span>Acceso a proyectos básicos</span>
+                    </li>
+                  </ul>
+                  <Button 
+                    className="w-full"
+                    variant="outline"
+                    onClick={handleGetStarted}
+                  >
+                    Comenzar Gratis
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Plan Pro */}
+              <Card className="relative overflow-hidden border-2 border-primary">
+                <div className="absolute top-0 right-0 bg-primary px-4 py-1 rounded-bl-lg text-sm font-medium text-primary-foreground">
+                  Recomendado
+                </div>
+                <CardContent className="p-6">
+                  <h3 className="text-2xl font-bold mb-2">Plan Pro</h3>
+                  <div className="mb-4">
+                    <span className="text-4xl font-bold">$10</span>
+                    <span className="text-muted-foreground">/mes</span>
+                  </div>
+                  <ul className="space-y-3 mb-6">
+                    <li className="flex items-center">
+                      <Check className="h-5 w-5 text-primary mr-2" />
+                      <span>Todo lo del plan gratuito</span>
+                    </li>
+                    <li className="flex items-center">
+                      <Check className="h-5 w-5 text-primary mr-2" />
+                      <span>Subir hasta 20 fotos</span>
+                    </li>
+                    <li className="flex items-center">
+                      <Check className="h-5 w-5 text-primary mr-2" />
+                      <span>Acceso a proyectos premium</span>
+                    </li>
+                    <li className="flex items-center">
+                      <Check className="h-5 w-5 text-primary mr-2" />
+                      <span>Estadísticas avanzadas</span>
+                    </li>
+                  </ul>
+                  <Button 
+                    className="w-full"
+                    onClick={handleGetStarted}
+                  >
+                    Comenzar Pro
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Plan Enterprise */}
+              <Card className="relative overflow-hidden border-2">
+                <CardContent className="p-6">
+                  <h3 className="text-2xl font-bold mb-2">Plan Enterprise</h3>
+                  <div className="mb-4">
+                    <span className="text-4xl font-bold">$20</span>
+                    <span className="text-muted-foreground">/mes</span>
+                  </div>
+                  <ul className="space-y-3 mb-6">
+                    <li className="flex items-center">
+                      <Check className="h-5 w-5 text-primary mr-2" />
+                      <span>Todo lo del plan Pro</span>
+                    </li>
+                    <li className="flex items-center">
+                      <Check className="h-5 w-5 text-primary mr-2" />
+                      <span>Fotos ilimitadas</span>
+                    </li>
+                    <li className="flex items-center">
+                      <Check className="h-5 w-5 text-primary mr-2" />
+                      <span>Acceso prioritario a proyectos</span>
+                    </li>
+                    <li className="flex items-center">
+                      <Check className="h-5 w-5 text-primary mr-2" />
+                      <span>Soporte premium 24/7</span>
+                    </li>
+                    <li className="flex items-center">
+                      <Check className="h-5 w-5 text-primary mr-2" />
+                      <span>Análisis de audiciones</span>
+                    </li>
+                  </ul>
+                  <Button 
+                    className="w-full"
+                    variant="outline"
+                    onClick={handleGetStarted}
+                  >
+                    Comenzar Enterprise
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* CTA section */}
       <section className="py-16 bg-primary text-primary-foreground">
         <div className="container mx-auto px-4 text-center">
@@ -218,6 +352,7 @@ export default function Home() {
               size="lg"
               onClick={handleGetStarted}
               className="bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
+              disabled={!!user}
             >
               Comenzar Ahora
             </Button>
@@ -283,8 +418,7 @@ export default function Home() {
                 <h3 className="font-medium mb-3">Plataforma</h3>
                 <ul className="space-y-2">
                   <li><Link to="/about" className="text-muted-foreground hover:text-foreground">Acerca de</Link></li>
-                  <li><Link to="/features" className="text-muted-foreground hover:text-foreground">Funcionalidades</Link></li>
-                  <li><Link to="/pricing" className="text-muted-foreground hover:text-foreground">Planes y Precios</Link></li>
+                  <li><Link to="/explore" className="text-muted-foreground hover:text-foreground">Explorar</Link></li>
                 </ul>
               </div>
               <div>

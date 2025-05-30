@@ -1,20 +1,28 @@
-import { BrowserRouter as Router, Routes, Route, Outlet } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { ThemeProvider } from "./components/providers/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
-import { Navbar } from "./components/layout/navbar";
+import Navbar from "./components/layout/navbar";
 import { Footer } from "./components/layout/footer";
 import Home from "./page";
+import Welcome from "./pages/welcome";
+import Landing from "./pages/landing";
 import Login from "./auth/login";
 import Register from "./auth/register";
 import Browse from "./pages/browse";
 import About from "./pages/about";
-import ActorProfile from "./actor/profile";
-import CastingProfile from "./casting/profile";
+import Blog from "./pages/blog";
+import Support from "./pages/support";
+import Contact from "./pages/contact";
+import Terms from "./pages/terms";
+import Privacy from "./pages/privacy";
+import ActorLayout from "./layouts/ActorLayout";
+import CastingLayout from "./layouts/CastingLayout";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
-import ExploreActors from "./explore/actors";
-import Welcome from "@/pages/welcome";
-import Landing from "@/pages/landing";
 import { AuthProvider } from "./contexts/AuthContext";
+import Explore from "./pages/explore";
+import ActorProfile from "./pages/actor/profile";
+import CastingProfile from "./pages/casting/profile";
+import ViewActorProfile from "./pages/actor/view-profile";
 
 // Componente Layout
 function Layout() {
@@ -35,11 +43,9 @@ function App() {
       <AuthProvider>
         <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Routes>
-            {/* Rutas públicas sin layout */}
+            {/* Rutas sin layout */}
             <Route path="/" element={<Welcome />} />
             <Route path="/landing" element={<Landing />} />
-
-            {/* Rutas de autenticación sin layout */}
             <Route path="/auth/login" element={<Login />} />
             <Route path="/auth/register" element={<Register />} />
 
@@ -48,37 +54,41 @@ function App() {
               <Route path="/page" element={<Home />} />
               <Route path="/browse" element={<Browse />} />
               <Route path="/about" element={<About />} />
-              
-              {/* Rutas protegidas para actores */}
-              <Route
-                path="/actor/profile"
-                element={
-                  <ProtectedRoute requiredUserType="actor">
-                    <ActorProfile />
-                  </ProtectedRoute>
-                }
-              />
-              
-              {/* Rutas protegidas para casting */}
-              <Route
-                path="/casting/profile"
-                element={
-                  <ProtectedRoute requiredUserType="casting">
-                    <CastingProfile />
-                  </ProtectedRoute>
-                }
-              />
-
-              {/* Ruta para explorar actores (solo directores) */}
-              <Route
-                path="/explore/actors"
-                element={
-                  <ProtectedRoute requiredUserType="director">
-                    <ExploreActors />
-                  </ProtectedRoute>
-                }
-              />
+              <Route path="/explore" element={<Explore />} />
+              <Route path="/blog" element={<Blog />} />
+              <Route path="/support" element={<Support />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/actors/:id" element={<ViewActorProfile />} />
             </Route>
+            
+            {/* Rutas protegidas para actores */}
+            <Route
+              path="/actor"
+              element={
+                <ProtectedRoute requiredUserType="actor">
+                  <ActorLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route path="profile" element={<ActorProfile />} />
+            </Route>
+
+            {/* Rutas protegidas para agentes de casting */}
+            <Route
+              path="/casting"
+              element={
+                <ProtectedRoute requiredUserType="casting_agent">
+                  <CastingLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route path="profile" element={<CastingProfile />} />
+            </Route>
+
+            {/* Ruta 404 */}
+            <Route path="*" element={<Navigate to="/" />} />
           </Routes>
           <Toaster />
         </Router>

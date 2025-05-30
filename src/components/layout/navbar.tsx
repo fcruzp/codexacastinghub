@@ -10,81 +10,64 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
+import { useAuth } from "../../contexts/AuthContext";
 
-export function Navbar() {
+export default function Navbar() {
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [userType, setUserType] = useState<"actor" | "casting_agent" | null>(null);
+  const [loading, setLoading] = useState(true);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [user, setUser] = useState<any>(null);
-  const [userType, setUserType] = useState<"actor" | "casting" | null>(null);
 
   useEffect(() => {
-    console.log("Navbar useEffect: Inicializando listener de autenticación");
-    // Verificar el usuario actual
-    checkUser();
-
-    // Suscribirse a los cambios de autenticación
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("onAuthStateChange Event:", event);
-      console.log("onAuthStateChange Session:", session);
-
-      if (event === 'SIGNED_IN' && session?.user) {
-        console.log("Usuario ha iniciado sesión:", session.user);
-        setUser(session.user);
-        await checkUserType(session.user.id);
-      } else if (event === 'SIGNED_OUT') {
-        console.log("Usuario ha cerrado sesión");
-        setUser(null);
+    const checkSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        
+        if (session?.user) {
+          await checkUserType(session.user.id);
+        } else {
+          setUserType(null);
+        }
+      } catch (error) {
+        console.error("Error checking session:", error);
         setUserType(null);
-        // Redirigir a la landing page después de cerrar sesión
-        navigate("/page");
+      } finally {
+        setLoading(false);
       }
-    });
-
-    return () => {
-      console.log("Navbar useEffect: Limpiando listener de autenticación");
-      subscription.unsubscribe();
     };
+
+    checkSession();
   }, []);
 
   const checkUserType = async (userId: string) => {
     try {
-      console.log("Verificando tipo de usuario para userId:", userId);
-      const { data: actorData } = await supabase
-        .from("actor_profiles")
-        .select("id")
+      const { data: userData, error: userDataError } = await supabase
+        .from("profiles")
+        .select("role")
         .eq("id", userId)
         .single();
 
-      if (actorData) {
-        console.log("Tipo de usuario: Actor");
-        setUserType("actor");
-      } else {
-        console.log("Tipo de usuario: Casting Director");
-        setUserType("casting");
-      }
-    } catch (error) {
-      console.error("Error checking user type:", error);
-    }
-  };
+      if (userDataError) throw userDataError;
 
-  const checkUser = async () => {
-    try {
-      console.log("Verificando usuario actual...");
-      const { data: { user }, error } = await supabase.auth.getUser();
-      if (error) throw error;
+      if (!userData || !userData.role) {
+        throw new Error("No se encontró el rol de usuario");
+      }
+
+      const role = userData.role.toLowerCase();
       
-      if (user) {
-        console.log("Usuario actual encontrado:", user);
-        setUser(user);
-        await checkUserType(user.id);
+      if (role === "actor") {
+        setUserType("actor");
+      } else if (role === "casting_agent") {
+        setUserType("casting_agent");
       } else {
-        console.log("No hay usuario actual logeado");
-        setUser(null);
         setUserType(null);
       }
     } catch (error) {
-      console.error("Error checking user:", error);
+      console.error("Error checking user type:", error);
+      setUserType(null);
     }
   };
 
@@ -120,14 +103,8 @@ export function Navbar() {
               CastingApp
             </Link>
             <div className="hidden md:flex items-center space-x-4 ml-8">
-              <Link to="/browse" className="text-sm font-medium hover:text-primary">
+              <Link to="/explore" className="text-sm font-medium hover:text-primary">
                 Explorar
-              </Link>
-              <Link to="/features" className="text-sm font-medium hover:text-primary">
-                Funcionalidades
-              </Link>
-              <Link to="/pricing" className="text-sm font-medium hover:text-primary">
-                Planes y Precios
               </Link>
               <Link to="/about" className="text-sm font-medium hover:text-primary">
                 Acerca de
@@ -158,17 +135,17 @@ export function Navbar() {
                   <div className="px-4 py-2 text-sm">
                     <p className="font-medium">{user.email}</p>
                     <p className="text-muted-foreground">
-                      {userType === "actor" ? "Actor/Actriz" : "Director de Casting"}
+                      {userType === "actor" ? "Actor/Actriz" : "Agente de Casting"}
                     </p>
                   </div>
                   <DropdownMenuItem asChild>
                     <Link to={userType === "actor" ? "/actor/profile" : "/casting/profile"}>
-                      Mi Perfil
+                      Perfil
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link to={userType === "actor" ? "/actor/dashboard" : "/casting/dashboard"}>
-                      Panel de Control
+                      Dashboard
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleSignOut}>
@@ -204,25 +181,11 @@ export function Navbar() {
         {isMenuOpen && (
           <div className="md:hidden py-4 space-y-4">
             <Link
-              to="/browse"
+              to="/explore"
               className="block text-sm font-medium hover:text-primary"
               onClick={() => setIsMenuOpen(false)}
             >
               Explorar
-            </Link>
-            <Link
-              to="/features"
-              className="block text-sm font-medium hover:text-primary"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Funcionalidades
-            </Link>
-            <Link
-              to="/pricing"
-              className="block text-sm font-medium hover:text-primary"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Planes y Precios
             </Link>
             <Link
               to="/about"

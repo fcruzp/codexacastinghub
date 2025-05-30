@@ -72,12 +72,12 @@ export default function ExploreActors() {
           return;
         }
 
-        // Verificar si el usuario es director
+        // Verificar si el usuario es casting_agent
         try {
           const { data: userData, error: userDataError } = await supabase
-            .from("user_roles")
+            .from("profiles")
             .select("role")
-            .eq("user_id", session.user.id)
+            .eq("id", session.user.id)
             .single();
 
           if (userDataError) {
@@ -86,8 +86,8 @@ export default function ExploreActors() {
             return;
           }
 
-          if (userData?.role !== "director") {
-            console.log('Usuario no es director');
+          if (userData?.role !== "casting_agent") {
+            console.log('Usuario no es agente de casting');
             navigate("/");
             return;
           }
@@ -119,12 +119,12 @@ export default function ExploreActors() {
         // Verificar rol nuevamente
         try {
           const { data: userData } = await supabase
-            .from("user_roles")
+            .from("profiles")
             .select("role")
-            .eq("user_id", session.user.id)
+            .eq("id", session.user.id)
             .single();
 
-          if (userData?.role !== "director") {
+          if (userData?.role !== "casting_agent") {
             navigate("/");
           }
         } catch (err) {
